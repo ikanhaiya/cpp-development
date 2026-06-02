@@ -36,7 +36,7 @@ size_t capacity;
         }
 
         this->size = cnt;   // setting the size to cnt; 
-        this->capacity = size+1;   // setting the capacity 
+        this->capacity = 2*size;   // setting the capacity 
         this->data = new char[capacity];
         size_t i = 0;
         while(*tmp!='\0'){
@@ -48,16 +48,111 @@ size_t capacity;
         
     }
 
-    char& operator[](size_t index)
+    // to access char at any index in string like s[idx]; 
+
+char& operator[](size_t index)
+{
+    if(index >= size)
     {
+        throw out_of_range("Index out of range");
+    }
+
     return data[index];
+}
+
+    // for CONCATENATION of string 
+
+    MyString operator+(const MyString& other){
+
+        char* tmpStr1 = data;
+        char* tmpStr2 = other.data;
+
+        size_t resCap = size + other.size + 1;      // getting the capacity for the new result string; 
+        
+        MyString result;
+        result.data = new char[resCap];   
+        result.capacity = resCap;
+        result.size = size+other.size; 
+
+        size_t idx = 0; 
+
+        while(*tmpStr1!='\0'){
+            result.data[idx] = *tmpStr1;
+            tmpStr1++;
+            idx++;
+        }
+       
+        
+
+        while(*tmpStr2!='\0'){
+            result.data[idx] = *tmpStr2;
+            tmpStr2++;
+            idx++;
+        }
+       
+        result.data[idx] = '\0';
+
+        return result;
+
+
+    }
+
+   // Method to get length of the string
+   
+   size_t length(){
+     
+    return this->size;
+   }
+
+   // APPENDING Character to the string push_back
+
+    void push_back(char ch){
+        
+        if(size + 1 >= capacity)
+    {
+        size_t newCapacity = capacity * 2; // increasing the size;
+
+        char* newData = new char[newCapacity];
+
+        for(size_t i = 0; i < size; i++)
+        {
+            newData[i] = data[i];
+        }
+
+        delete[] data;
+
+        data = newData;
+        capacity = newCapacity;
+    }
+
+    data[size] = ch;
+    size++;
+
+    data[size] = '\0';
+
+
+    }
+
+    // REMOVING LAST Character 
+
+    void pop_back(){
+
+        if(size>0){
+            size = size - 1;
+            data[size] = '\0';
+            capacity = capacity-1;
+        }
+        else{
+            throw out_of_range("invalid memory access");
+        }
+
     }
 
     
 
     // doing cout<<s2; using friend function 
 
-    friend ostream& operator<<(ostream& os, const MyString& other);  // tells compiler there is fn outside class that can access private data member of class
+    friend ostream& operator<<(ostream& os, const MyString& other);  // tells compiler there is functioncl outside class that can access private data member of class
 
 };
 
@@ -71,10 +166,13 @@ ostream& operator<<(ostream& os, const MyString& str){
 
 
 
+
+
 int main(){
 
     MyString s1;
     MyString s2("abc");
+    MyString s4("def");
 
     cout<<s2<<endl;
     // cout<<s; compiler converts it into operator<<(cout,s);
@@ -84,6 +182,21 @@ int main(){
 
     cout<<s2[0]<<endl;  // s2[0] is converted to s2.operator[](0); cause as soon as compiler sees s2 it understands its of s2 class then it converts it to s2.opertor[](0) and this
     //  returns type char and compiler already knows cout<<char
+
+    cout<<s2+s4<<endl;
+
+    cout<<s2<<" "<<s4<<endl;
+    
+    cout<<s2.length()<<endl;  // getting length of the string 
+
+    s2.push_back('g');
+
+    cout<<s2<<endl;
+
+    s2.pop_back();
+    cout<<s2<<endl;
+
+    s1.pop_back();
 
     return 0;
 }
