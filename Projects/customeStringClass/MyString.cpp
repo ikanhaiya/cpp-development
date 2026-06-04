@@ -249,6 +249,29 @@ size_t find(const MyString& pattern)
     return static_cast<size_t>(-1);
 }
 
+// implementing substr function gives substr from i to j
+
+ MyString substr(size_t i, size_t j){
+
+    if(i>j){
+        throw out_of_range("invalid range");
+    }
+
+    if(i>size-1 || j>size-1){
+        throw out_of_range("Index out of range");
+    }
+
+    MyString result;
+    
+
+    for(size_t k = i;k<=j;k++){
+        result.push_back(data[k]);
+    }
+
+    return result;
+
+ }
+
     
 
     // doing cout<<s2; using friend function 
@@ -273,7 +296,7 @@ int main(){
 
     MyString s1;
     MyString s2("abc");
-    MyString s4("aaaaaaaaaaabab");
+    MyString s4("abcdefghijklm");
 
     cout<<s2<<endl;
     // cout<<s; compiler converts it into operator<<(cout,s);
@@ -299,7 +322,8 @@ int main(){
 
     // s1.pop_back();
 
-    cout<<s4.find("aaab");
+   cout<<s4.substr(10,5);
+
 
     return 0;
 }
