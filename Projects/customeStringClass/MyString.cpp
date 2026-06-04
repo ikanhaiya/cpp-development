@@ -140,13 +140,114 @@ char& operator[](size_t index)
         if(size>0){
             size = size - 1;
             data[size] = '\0';
-            capacity = capacity-1;
+            // capacity = capacity-1;   // dont reduce capacity, cause memory is still allocated just changing the variable wont do anything;
         }
         else{
             throw out_of_range("invalid memory access");
         }
 
     }
+
+    // COMPARING two strings whether they are equal or not here we will == operator overloading 
+
+    bool operator==(const MyString& other) const {
+
+        if(size!=other.size){
+            return false;
+        }
+
+        char* tmp1 = data;
+        char* tmp2 = other.data;
+
+        while(*tmp2!='\0'){
+            if(*tmp2!=*tmp1){
+                return false;
+            }
+            tmp2++;
+            tmp1++;
+        }
+
+        return true;
+    }
+
+    bool operator!=(const MyString& other) const
+    {
+            return !(*this==other);
+    }
+
+    // Finding SUBSTRING in string whether it exists or not; 
+size_t find(const MyString& pattern)
+{
+    if(pattern.size == 0)
+        return 0;
+
+    if(size < pattern.size)
+        return static_cast<size_t>(-1);
+
+    // Build LPS array
+    size_t* lps = new size_t[pattern.size];
+
+    lps[0] = 0;
+
+    size_t len = 0;
+    size_t i = 1;
+
+    while(i < pattern.size)
+    {
+        if(pattern.data[i] == pattern.data[len])
+        {
+            len++;
+            lps[i] = len;
+            i++;
+        }
+        else
+        {
+            if(len != 0)
+            {
+                len = lps[len - 1];
+            }
+            else
+            {
+                lps[i] = 0;
+                i++;
+            }
+        }
+    }
+
+    // KMP Search
+    size_t j = 0;
+    i = 0;
+
+    while(i < size)
+    {
+        if(data[i] == pattern.data[j])
+        {
+            i++;
+            j++;
+        }
+
+        if(j == pattern.size)
+        {
+            delete[] lps;
+            return i - j;
+        }
+        else if(i < size && data[i] != pattern.data[j])
+        {
+            if(j != 0)
+            {
+                j = lps[j - 1];
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+
+    delete[] lps;
+
+    return static_cast<size_t>(-1);
+}
 
     
 
@@ -172,7 +273,7 @@ int main(){
 
     MyString s1;
     MyString s2("abc");
-    MyString s4("def");
+    MyString s4("aaaaaaaaaaabab");
 
     cout<<s2<<endl;
     // cout<<s; compiler converts it into operator<<(cout,s);
@@ -196,7 +297,10 @@ int main(){
     s2.pop_back();
     cout<<s2<<endl;
 
-    s1.pop_back();
+    // s1.pop_back();
+
+    cout<<s4.find("aaab");
 
     return 0;
 }
+
