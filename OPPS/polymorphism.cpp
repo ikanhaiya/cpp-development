@@ -70,6 +70,7 @@ int main(){
     Bird* bd = new Parrot();
     bd->sound(); // bd->sound() gives "Parrot Sound", At runtime bd actually points to parrot object so parrot's version is executed 
 
+    // with virtual derived class destructor is executed first followed by base class destructor 
     delete bd; // to delete bd which is pointer of type bird but at runtime points to parrot object and allocated memory also to run the destructor of the parrot 
     // you have to make destructor of bird class as virtual. 
 
