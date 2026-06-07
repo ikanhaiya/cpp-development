@@ -1,11 +1,33 @@
 #include<bits/stdc++.h>
 using namespace std;
 
+
 enum class vehicleType{
     CAR, 
     BIKE,
     TRUCK
 };
+
+ostream& operator<<(ostream& os, vehicleType type){
+    switch(type)
+    {                                  // os: output stream 
+        case vehicleType::CAR:
+            os << "CAR";
+            break;
+
+        case vehicleType::BIKE:
+            os << "BIKE";
+            break;
+
+        case vehicleType::TRUCK:
+            os << "TRUCK";
+            break;
+    }
+
+    return os;  /* this return is done for operator chaining cout<<vehicleType<<"parked"; 
+     so when cout<<vehicleType is converted to operator<<(cout,vehicletype) if it return cout then only cout<<"parked"; will be done*/
+}
+
 
 class vehicle{ 
 
@@ -17,6 +39,10 @@ class vehicle{
 
         vehicleType getType() const{
             return type;
+        }
+
+        string getPlateNumber(){
+            return plate_number;
         }
 
 };
@@ -60,7 +86,37 @@ class parkingSpot{
             return spotType;
         }
 
+        string getPlateNumber(){
+            return parkedVehicle->getPlateNumber();
+        }
+
 };
+
+class createTicket{
+
+    static int nextTicketId;
+    int ticketId;
+    time_t entryTime;
+    parkingSpot* spot; // parkingSpot has spot number , spot type and parked vehicle 
+
+    public: 
+        
+        createTicket( time_t etime,parkingSpot* spt) : entryTime(etime), spot(spt) {
+            ticketId = nextTicketId++; 
+        }
+
+        // displaying the ticket information
+        
+        void display(){
+            cout<<"Ticket ID:    "<<ticketId<<endl;
+            cout<<"Entry time:   "<<entryTime<<endl;
+            cout<<"Spot type:    "<<spot->getSpotType()<<endl;
+            cout<<"Spot Number:  "<<spot->getSpotNo()<<endl;
+            cout<<"Plate Number: "<<spot->getPlateNumber()<<endl;
+        }
+
+};
+int createTicket::nextTicketId = 0;
 
 class parkingLot{
     /* Its job is:
@@ -83,25 +139,26 @@ class parkingLot{
         // check if any spot is available for vehicle type v
         for(parkingSpot sp : spots){
             if(sp.parkVehicle(v)){
+                createTicket ticket1(time(nullptr), &sp);
+                ticket1.display();
                 return true;
             }
         }
         return false;
     }
-
-
-
-
 };
+
 
 int main(){
     vehicle car("HR26AB1234", vehicleType::CAR);
-    vehicle v1("HWqwq3872", vehicleType::BIKE);
+    vehicle bike("HWqwq3872", vehicleType::BIKE);
+    vehicle truck("afsdfa", vehicleType::TRUCK);
 
     parkingLot lot1;
-    if(lot1.parkVehicle(&car)){
-        cout<<"vehicle parked";
-    }
+    
+    lot1.parkVehicle(&car);
+    lot1.parkVehicle(&bike);
+    
 
     return 0;
 }
