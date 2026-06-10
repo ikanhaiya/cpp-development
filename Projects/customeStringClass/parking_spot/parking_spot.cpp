@@ -92,7 +92,7 @@ class parkingSpot{
 
 };
 
-class createTicket{
+class parkingTicket{
 
     static int nextTicketId;
     int ticketId;
@@ -101,22 +101,39 @@ class createTicket{
 
     public: 
         
-        createTicket( time_t etime,parkingSpot* spt) : entryTime(etime), spot(spt) {
+        parkingTicket( time_t etime,parkingSpot* spt) : entryTime(etime), spot(spt) {
             ticketId = nextTicketId++; 
+            
         }
 
         // displaying the ticket information
         
         void display(){
             cout<<"Ticket ID:    "<<ticketId<<endl;
-            cout<<"Entry time:   "<<entryTime<<endl;
+            tm* t = localtime(&entryTime);
+            cout<<"Entry time:   "<<t->tm_hour<<":"<<t->tm_min<<":"<<t->tm_sec<<endl;  
             cout<<"Spot type:    "<<spot->getSpotType()<<endl;
             cout<<"Spot Number:  "<<spot->getSpotNo()<<endl;
             cout<<"Plate Number: "<<spot->getPlateNumber()<<endl;
+          
+        }
+
+        int getTicketId(){
+            return ticketId;
+        }
+
+        void removeVehicle(){
+            tm* t = localtime(&entryTime);
+            cout<<"Ticket ID:    "<<ticketId<<endl;
+            cout<<"Exit time:    "<<t->tm_hour<<":"<<t->tm_min<<":"<<t->tm_sec<<endl;
+            cout<<"Spot type:    "<<spot->getSpotType()<<endl;
+            cout<<"Spot Number:  "<<spot->getSpotNo()<<endl;
+            cout<<"Plate Number: "<<spot->getPlateNumber()<<endl;
+            spot->removeVehicle();  
         }
 
 };
-int createTicket::nextTicketId = 0;
+int parkingTicket::nextTicketId = 0;
 
 class parkingLot{
     /* Its job is:
@@ -124,8 +141,10 @@ class parkingLot{
         1> Store parking spots.
         2> Find a suitable free spot.
         3> Ask that spot to park the vehicle.*/
-    
+
+    unordered_map<int,parkingTicket> ticketContainer;
     vector<parkingSpot> spots;
+
     public:
     parkingLot() {
         spots.push_back(parkingSpot(1, vehicleType::CAR));
@@ -134,19 +153,36 @@ class parkingLot{
         spots.push_back(parkingSpot(4, vehicleType::TRUCK));
     }
 
+
     bool parkVehicle(vehicle* v){
         
         // check if any spot is available for vehicle type v
-        for(parkingSpot sp : spots){
+        for(parkingSpot& sp : spots){
             if(sp.parkVehicle(v)){
-                createTicket ticket1(time(nullptr), &sp);
+                parkingTicket ticket1(time(nullptr), &sp);
+                ticketContainer.emplace(ticket1.getTicketId(), ticket1);
+                 /*  ticketContainer[ticket1.getTicketId()] = ticket1;  if insert is done like this if ticketId not exists it tries to create new ticket and assign it to ticket1 
+                  and doing so it tries to call default constructor but constructor is already overloaded so fails*/
                 ticket1.display();
                 return true;
             }
         }
         return false;
     }
+
+    bool removeVechicle(int tId){
+       auto it = ticketContainer.find(tId);
+
+        if(it != ticketContainer.end()){
+        it->second.removeVehicle();
+        ticketContainer.erase(it);
+        return true;
+    }   
+
+        return false;
+    }
 };
+
 
 
 int main(){
@@ -158,7 +194,11 @@ int main(){
     
     lot1.parkVehicle(&car);
     lot1.parkVehicle(&bike);
+    lot1.parkVehicle(&truck);
     
+
+    lot1.removeVechicle(2);
+
 
     return 0;
 }
