@@ -106,6 +106,36 @@ class parkingTicket{
             
         }
 
+        double calculateFee() {
+
+         time_t exitTime = time(nullptr);       
+
+         double durationSeconds = difftime(exitTime, entryTime);    
+
+         double durationHours = durationSeconds / 3600.0;       
+
+         vehicleType type = spot->getSpotType();    
+
+         double ratePerHour = 0;    
+
+         switch(type) {     
+
+             case vehicleType::CAR:
+                 ratePerHour = 20;
+                 break;     
+
+             case vehicleType::BIKE:
+                 ratePerHour = 10;
+                 break;     
+
+             case vehicleType::TRUCK:
+                 ratePerHour = 50;
+                 break;
+         }      
+
+         return durationHours * ratePerHour;
+        }
+
         // displaying the ticket information
         
         void display(){
@@ -123,12 +153,13 @@ class parkingTicket{
         }
 
         void removeVehicle(){
-            tm* t = localtime(&entryTime);
+            tm* t = localtime(nullptr);
             cout<<"Ticket ID:    "<<ticketId<<endl;
             cout<<"Exit time:    "<<t->tm_hour<<":"<<t->tm_min<<":"<<t->tm_sec<<endl;
             cout<<"Spot type:    "<<spot->getSpotType()<<endl;
             cout<<"Spot Number:  "<<spot->getSpotNo()<<endl;
             cout<<"Plate Number: "<<spot->getPlateNumber()<<endl;
+            cout << "Parking Fee: ₹" << calculateFee() << endl;
             spot->removeVehicle();  
         }
 

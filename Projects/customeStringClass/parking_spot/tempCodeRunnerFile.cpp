@@ -1,0 +1,3 @@
+ int getTicketId(){
+            return ticketId;
+        }
