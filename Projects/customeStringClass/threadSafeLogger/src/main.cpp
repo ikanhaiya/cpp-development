@@ -8,25 +8,25 @@ enum class severity{
     WARNING,
     ERROR,
     CRITICAL,
-    FATAL
+    FATAL,
+    Count
 };
 
 class Logger{
 
     ofstream logfile;
-
+    mutex writemtx;
+    severity minSeverity;
     public:
-        Logger(const string& AppName): logfile(AppName + ".log", std::ios::app){
+        Logger(const string& AppName, severity mini): logfile(AppName + ".log", std::ios::app), minSeverity(mini){
 
             if (!logfile) {
                 throw runtime_error("Failed to open log file");
             }
-
-
             // log("application started", level);
         }
 
-        string toString(severity level){
+        string toString(const severity& level){
             switch(level){
                 case severity::TRACE: return "TRACE";
                 case severity::CRITICAL: return "CRITICAL";
@@ -51,20 +51,32 @@ class Logger{
         }
 
         void log(string msg, severity level){
+
+            if(static_cast<int>(level) < static_cast<int>(minSeverity)) return;
+
+            auto t = getTime();
+            string lev = toString(level);
             
-            logfile<<getTime()<<": ["<<toString(level)<<"]"<<": "<<msg<<"\n";
-            cout<<msg;
+            lock_guard<mutex> lock(writemtx);
+            logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";
+             // this whole line is atomic event
+            
         }
 
 };
 
+
 int main(){
 
-    Logger logger("BankingApp");
+    Logger logger("BankingApp", severity::WARNING);
+
 
     logger.log("Application Started", severity::INFO);
 
 
+
+   
+   
     
 
     return 0;
