@@ -12,13 +12,20 @@ enum class severity{
     Count
 };
 
+enum class logSaveChoice{   // tells where to output log in logfile, in console or in both, 
+    LOGFILE,
+    CONSOLE,
+    BOTH
+};
+
 class Logger{
 
     ofstream logfile;
     mutex writemtx;
     severity minSeverity;
+    logSaveChoice logChoice;
     public:
-        Logger(const string& AppName, severity mini): logfile(AppName + ".log", std::ios::app), minSeverity(mini){
+        Logger(const string& AppName, severity mini,logSaveChoice c): logfile(AppName + ".log", std::ios::app), minSeverity(mini), logChoice(c){
 
             if (!logfile) {
                 throw runtime_error("Failed to open log file");
@@ -56,10 +63,23 @@ class Logger{
 
             auto t = getTime();
             string lev = toString(level);
-            
+
             lock_guard<mutex> lock(writemtx);
-            logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";
+            if(logChoice == logSaveChoice::LOGFILE){
+             logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";  
              // this whole line is atomic event
+            }
+            else if(logChoice == logSaveChoice::CONSOLE){
+                          
+                cout<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";  // this line is atomic 
+            }
+            else{
+                logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";   // this whole block is atomic 
+                cout<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";
+            }
+            
+            
+            
             
         }
 
@@ -68,10 +88,10 @@ class Logger{
 
 int main(){
 
-    Logger logger("BankingApp", severity::WARNING);
+    Logger logger("BankingApp", severity::WARNING,logSaveChoice::BOTH);
 
 
-    logger.log("Application Started", severity::INFO);
+    logger.log("Application Started", severity::FATAL);
 
 
 

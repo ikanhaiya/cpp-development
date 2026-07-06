@@ -12,13 +12,20 @@ enum class severity{
     Count
 };
 
+enum class logSaveChoice{   // tells where to output log in logfile, in console or in both, 
+    LOGFILE,
+    CONSOLE,
+    BOTH
+};
+
 class Logger{
 
     ofstream logfile;
     mutex writemtx;
     severity minSeverity;
+    logSaveChoice logChoice;
     public:
-        Logger(const string& AppName, severity mini): logfile(AppName + ".log", std::ios::app), minSeverity(mini){
+        Logger(const string& AppName, severity mini,logSaveChoice c): logfile(AppName + ".log", std::ios::app), minSeverity(mini), logChoice(c){
 
             if (!logfile) {
                 throw runtime_error("Failed to open log file");
@@ -41,9 +48,9 @@ class Logger{
         }
 
         auto getTime(){
-            auto now = chrono::system_clock::now();  // this gives time in some large number which is tick from epoch 1970
+            auto now = chrono::system_clock::now();
 
-            time_t currentTime = chrono::system_clock::to_time_t(now); 
+            time_t currentTime = chrono::system_clock::to_time_t(now);
             
         
             return put_time(localtime(&currentTime),
@@ -52,14 +59,27 @@ class Logger{
 
         void log(string msg, severity level){
 
-            if(static_cast<int>(level) < static_cast<int>(minSeverity)) return; // filtering the severity some which less severe then min severity are ignored
+            if(static_cast<int>(level) < static_cast<int>(minSeverity)) return;
 
             auto t = getTime();
             string lev = toString(level);
-            
+
             lock_guard<mutex> lock(writemtx);
-            logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";
+            if(logChoice == logSaveChoice::LOGFILE){
+             logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";  
              // this whole line is atomic event
+            }
+            else if(logChoice == logSaveChoice::CONSOLE){
+                          
+                cout<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";  // this line is atomic 
+            }
+            else{
+                logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";   // this whole block is atomic 
+                cout<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";
+            }
+            
+            
+            
             
         }
 
