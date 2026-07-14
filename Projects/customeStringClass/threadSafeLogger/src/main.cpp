@@ -24,6 +24,7 @@ class Logger{
     mutex writemtx;
     severity minSeverity;
     logSaveChoice logChoice;
+
     public:
         Logger(const string& AppName, severity mini,logSaveChoice c): logfile(AppName + ".log", std::ios::app), minSeverity(mini), logChoice(c){
 
@@ -67,7 +68,7 @@ class Logger{
             lock_guard<mutex> lock(writemtx);
             if(logChoice == logSaveChoice::LOGFILE){
              logfile<<t<<": ["<<lev<<"]"<<": "<<msg<<"\n";  
-             // this whole line is atomic event
+             // this 
             }
             else if(logChoice == logSaveChoice::CONSOLE){
                           
@@ -89,15 +90,8 @@ class Logger{
 int main(){
 
     Logger logger("BankingApp", severity::WARNING,logSaveChoice::BOTH);
-
-
     logger.log("Application Started", severity::FATAL);
 
-
-
-   
-   
     
-
     return 0;
 }
